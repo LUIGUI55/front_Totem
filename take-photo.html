@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Totem Photo - Tomar Foto</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="app-container">
+            <div class="header">
+                <div class="header-content">
+                    <h1>Totem Photo</h1>
+                    <p>Captura tu momento</p>
+                </div>
+
+                <!-- Dropdown Menu Toggle -->
+                <button class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div class="dropdown-menu">
+                    <a href="photos.html" class="dropdown-item"><i class="fas fa-images"></i> Galería Principal</a>
+                    <a href="gallery.html" class="dropdown-item"><i class="fas fa-photo-video"></i> Mis Fotos</a>
+                    <a href="qr.html" class="dropdown-item"><i class="fas fa-qrcode"></i> Escanear QR</a>
+                    <a href="#" class="dropdown-item" data-modal-target="help-modal"><i
+                            class="fas fa-question-circle"></i> Ayuda</a>
+                    <a href="#" class="dropdown-item" data-modal-target="config-modal"><i class="fas fa-cog"></i>
+                        Configuración</a>
+                    <a href="index.html" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Salir</a>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="camera-container">
+                    <h2 class="page-title">Tomar Foto</h2>
+
+                    <div class="camera-preview">
+                        <video id="camera-video" autoplay playsinline></video>
+                        <canvas id="camera-canvas"></canvas>
+                    </div>
+
+                    <div class="camera-controls">
+                        <button class="capture-btn" id="capture-btn" title="Capturar foto"></button>
+                    </div>
+
+                    <div id="camera-message" style="text-align: center; margin-bottom: 20px; color: #e879f9;"></div>
+
+                    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                        <a href="gallery.html" class="btn" style="max-width: 200px;">Ver Galería</a>
+                        <a href="photos.html" class="btn" style="max-width: 200px;">Menú Principal</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <h2 class="page-title">AYUDA</h2>
+            <div class="page-text">
+                <p>Bienvenido a la sección de ayuda de Totem Photo.</p>
+                <p>Si tienes problemas para iniciar sesión, toma de fotos o cualquier otra función, no dudes en
+                    contactarnos.</p>
+                <p><strong>Email:</strong> support@totemphoto.com</p>
+                <p><strong>Teléfono:</strong> +1 234 567 890</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Config Modal -->
+    <div id="config-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <h2 class="page-title">CONFIGURACIÓN</h2>
+            <div class="form-container" style="box-shadow: none; padding: 0;">
+                <div class="form-group">
+                    <label for="language">Idioma</label>
+                    <select id="language">
+                        <option value="es">Español</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="quality">Calidad de imagen</label>
+                    <select id="quality">
+                        <option value="high">Alta</option>
+                        <option value="medium">Media</option>
+                        <option value="low">Baja</option>
+                    </select>
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="notifications" checked style="width: auto;">
+                    <label for="notifications" style="margin: 0;">Notificaciones</label>
+                </div>
+                <button class="btn">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        // Camera functionality
+        const video = document.getElementById('camera-video');
+        const canvas = document.getElementById('camera-canvas');
+        const captureBtn = document.getElementById('capture-btn');
+        const messageDiv = document.getElementById('camera-message');
+
+        // Initialize camera
+        async function initCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user' },
+                    audio: false
+                });
+                video.srcObject = stream;
+                messageDiv.textContent = 'Cámara lista. Haz clic en el botón para capturar.';
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                messageDiv.textContent = 'Error: No se pudo acceder a la cámara. Por favor, permite el acceso.';
+                messageDiv.style.color = '#ff6b6b';
+            }
+        }
+
+        // Capture photo
+        captureBtn.addEventListener('click', function () {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+
+            // Convert to data URL
+            const photoData = canvas.toDataURL('image/jpeg');
+
+            // Save to localStorage
+            let photos = JSON.parse(localStorage.getItem('totemPhotos') || '[]');
+            photos.push({
+                id: Date.now(),
+                data: photoData,
+                timestamp: new Date().toISOString()
+            });
+            localStorage.setItem('totemPhotos', JSON.stringify(photos));
+
+            messageDiv.textContent = '¡Foto capturada! Ve a la galería para verla.';
+            messageDiv.style.color = '#e879f9';
+
+            // Flash effect
+            canvas.style.display = 'block';
+            setTimeout(() => {
+                canvas.style.display = 'none';
+            }, 100);
+        });
+
+        // Initialize on load
+        initCamera();
+    </script>
+</body>
+
+</html>

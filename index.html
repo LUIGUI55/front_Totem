@@ -1,340 +1,52 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Totem Photo</title>
+    <title>Totem Photo - Login</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            padding: 20px;
-        }
-
-        .app-container {
-            background-color: rgba(0, 0, 0, 0.7);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .header {
-            background-color: #1a1a2e;
-            padding: 20px;
-            text-align: center;
-            border-bottom: 3px solid #fdbb2d;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            color: #fdbb2d;
-        }
-
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.8;
-        }
-
-        .content {
-            padding: 30px;
-            min-height: 500px;
-        }
-
-        /* Estilos para formularios */
-        .form-container {
-            max-width: 400px;
-            margin: 0 auto;
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .form-title {
-            text-align: center;
-            margin-bottom: 25px;
-            font-size: 1.8rem;
-            color: #fdbb2d;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: none;
-            border-radius: 8px;
-            background-color: rgba(255, 255, 255, 0.9);
-            font-size: 1rem;
-        }
-
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            background-color: #fdbb2d;
-            color: #1a1a2e;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-        }
-
-        .btn:hover {
-            background-color: #ffcc44;
-            transform: translateY(-2px);
-        }
-
-        .link {
-            text-align: center;
-            margin-top: 15px;
-        }
-
-        .link a {
-            color: #fdbb2d;
-            text-decoration: none;
-        }
-
-        .link a:hover {
-            text-decoration: underline;
-        }
-
-        /* Estilos para el menú principal */
-        .menu-container {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .carousel-section {
-            flex: 1;
-            margin-bottom: 30px;
-        }
-
-        .carousel-title {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-            color: #fdbb2d;
-        }
-
-        .carousel {
-            width: 100%;
-            height: 300px;
-            overflow: hidden;
-            position: relative;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .carousel-inner {
-            display: flex;
-            transition: transform 0.5s ease;
-            height: 100%;
-        }
-
-        .carousel-item {
-            min-width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: rgba(255, 255, 255, 0.1);
-            font-size: 2rem;
-            color: white;
-        }
-
-        .carousel-controls {
-            display: flex;
-            justify-content: center;
-            margin-top: 15px;
-        }
-
-        .carousel-control {
-            background-color: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin: 0 10px;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-
-        .templates-section {
-            margin-top: 20px;
-        }
-
-        .templates-title {
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 1.5rem;
-            color: #fdbb2d;
-        }
-
-        .templates-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 15px;
-        }
-
-        .template-item {
-            height: 100px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .template-item:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            transform: scale(1.05);
-        }
-
-        /* Estilos para el menú de navegación */
-        .nav-menu {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .nav-item {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .nav-item:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-5px);
-        }
-
-        .nav-item h3 {
-            margin-bottom: 10px;
-            color: #fdbb2d;
-        }
-
-        /* Estilos para la página QR */
-        .qr-container {
-            text-align: center;
-            padding: 30px;
-        }
-
-        .qr-title {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: #fdbb2d;
-        }
-
-        .qr-code {
-            width: 250px;
-            height: 250px;
-            margin: 0 auto 30px;
-            background-color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 15px;
-            font-size: 1.2rem;
-            color: #1a1a2e;
-        }
-
-        /* Estilos para páginas de contenido */
-        .page-content {
-            padding: 20px;
-        }
-
-        .page-title {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: #fdbb2d;
-            text-align: center;
-        }
-
-        .page-text {
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        /* Ocultar secciones por defecto */
         .section {
             display: none;
         }
 
-        .active {
+        .section.active {
             display: block;
+            animation: fadeIn 0.5s ease;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
             }
-            
-            .content {
-                padding: 15px;
-            }
-            
-            .nav-menu {
-                grid-template-columns: 1fr;
-            }
-            
-            .carousel {
-                height: 200px;
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <div class="app-container">
+        <div class="app-container" style="min-height: auto;">
             <div class="header">
-                <h1>Totem Photo</h1>
-                <p>Get your touch!</p>
+                <div class="header-content">
+                    <h1>Totem Photo</h1>
+                    <p>Get your touch!</p>
+                </div>
             </div>
-            
+
             <div class="content">
                 <!-- Página de Login -->
                 <div id="login-section" class="section active">
                     <div class="form-container">
                         <h2 class="form-title">Login</h2>
-                        <form id="login-form">
+                        <form id="login-form" action="photos.html">
                             <div class="form-group">
                                 <label for="username">Username</label>
                                 <input type="text" id="username" name="username" required>
@@ -353,12 +65,12 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Página de Registro -->
                 <div id="signup-section" class="section">
                     <div class="form-container">
                         <h2 class="form-title">Signup</h2>
-                        <form id="signup-form">
+                        <form id="signup-form" action="photos.html">
                             <div class="form-group">
                                 <label for="signup-username">Username</label>
                                 <input type="text" id="signup-username" name="username" required>
@@ -382,237 +94,30 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Menú Principal -->
-                <div id="menu-section" class="section">
-                    <div class="menu-container">
-                        <div class="carousel-section">
-                            <h2 class="carousel-title">Fotos Recientes</h2>
-                            <div class="carousel">
-                                <div class="carousel-inner">
-                                    <div class="carousel-item">Foto 1</div>
-                                    <div class="carousel-item">Foto 2</div>
-                                    <div class="carousel-item">Foto 3</div>
-                                    <div class="carousel-item">Foto 4</div>
-                                </div>
-                            </div>
-                            <div class="carousel-controls">
-                                <button class="carousel-control prev">&#10094;</button>
-                                <button class="carousel-control next">&#10095;</button>
-                            </div>
-                        </div>
-                        
-                        <div class="templates-section">
-                            <h2 class="templates-title">Templates Disponibles</h2>
-                            <div class="templates-grid">
-                                <div class="template-item">Template 1</div>
-                                <div class="template-item">Template 2</div>
-                                <div class="template-item">Template 3</div>
-                                <div class="template-item">Template 4</div>
-                                <div class="template-item">Template 5</div>
-                                <div class="template-item">Template 6</div>
-                            </div>
-                        </div>
-                        
-                        <div class="nav-menu">
-                            <div class="nav-item" id="go-to-take-photo">
-                                <h3>TOMAR FOTO</h3>
-                                <p>Captura tu momento especial</p>
-                            </div>
-                            <div class="nav-item" id="go-to-help">
-                                <h3>HELP</h3>
-                                <p>Asistencia y soporte</p>
-                            </div>
-                            <div class="nav-item" id="go-to-photos">
-                                <h3>FOTOS</h3>
-                                <p>Galería de fotos</p>
-                            </div>
-                            <div class="nav-item" id="go-to-config">
-                                <h3>CONFIGURACIÓN</h3>
-                                <p>Ajustes de la aplicación</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Página Tomar Foto (QR) -->
-                <div id="take-photo-section" class="section">
-                    <div class="qr-container">
-                        <h2 class="qr-title">Scan me!</h2>
-                        <div class="qr-code">
-                            [CÓDIGO QR AQUÍ]
-                        </div>
-                        <p>YOUR LOCO</p>
-                        <button class="btn" id="back-to-menu">Regresar al menú principal</button>
-                    </div>
-                </div>
-                
-                <!-- Página de Ayuda -->
-                <div id="help-section" class="section">
-                    <div class="page-content">
-                        <h2 class="page-title">HELP</h2>
-                        <div class="page-text">
-                            <p>Bienvenido a la sección de ayuda de Totem Photo. Aquí encontrarás información sobre cómo utilizar nuestra aplicación.</p>
-                            <p>Si tienes problemas para iniciar sesión, toma de fotos o cualquier otra función, no dudes en contactarnos.</p>
-                            <p>Email de soporte: support@totemphoto.com</p>
-                            <p>Teléfono: +1 234 567 890</p>
-                        </div>
-                        <button class="btn" id="back-to-menu-2">Regresar al menú principal</button>
-                    </div>
-                </div>
-                
-                <!-- Página de Fotos -->
-                <div id="photos-section" class="section">
-                    <div class="page-content">
-                        <h2 class="page-title">FOTOS</h2>
-                        <div class="page-text">
-                            <p>Aquí puedes ver todas las fotos que has tomado con Totem Photo.</p>
-                        </div>
-                        <div class="templates-grid">
-                            <div class="template-item">Foto 1</div>
-                            <div class="template-item">Foto 2</div>
-                            <div class="template-item">Foto 3</div>
-                            <div class="template-item">Foto 4</div>
-                            <div class="template-item">Foto 5</div>
-                            <div class="template-item">Foto 6</div>
-                        </div>
-                        <button class="btn" id="back-to-menu-3">Regresar al menú principal</button>
-                    </div>
-                </div>
-                
-                <!-- Página de Configuración -->
-                <div id="config-section" class="section">
-                    <div class="page-content">
-                        <h2 class="page-title">CONFIGURACIÓN</h2>
-                        <div class="page-text">
-                            <p>Configura las opciones de Totem Photo según tus preferencias.</p>
-                        </div>
-                        <div class="form-container">
-                            <div class="form-group">
-                                <label for="language">Idioma</label>
-                                <select id="language" class="form-control">
-                                    <option value="es">Español</option>
-                                    <option value="en">English</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="quality">Calidad de imagen</label>
-                                <select id="quality" class="form-control">
-                                    <option value="high">Alta</option>
-                                    <option value="medium">Media</option>
-                                    <option value="low">Baja</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="notifications">Notificaciones</label>
-                                <input type="checkbox" id="notifications" checked>
-                            </div>
-                            <button class="btn">Guardar Configuración</button>
-                        </div>
-                        <button class="btn" id="back-to-menu-4">Regresar al menú principal</button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Navegación entre secciones
-        document.addEventListener('DOMContentLoaded', function() {
-            // Elementos de navegación
+        document.addEventListener('DOMContentLoaded', function () {
             const goToSignup = document.getElementById('go-to-signup');
             const goToLogin = document.getElementById('go-to-login');
-            const loginForm = document.getElementById('login-form');
-            const signupForm = document.getElementById('signup-form');
-            const goToTakePhoto = document.getElementById('go-to-take-photo');
-            const goToHelp = document.getElementById('go-to-help');
-            const goToPhotos = document.getElementById('go-to-photos');
-            const goToConfig = document.getElementById('go-to-config');
-            const backToMenuButtons = document.querySelectorAll('[id^="back-to-menu"]');
-            
-            // Secciones
-            const sections = document.querySelectorAll('.section');
-            
-            // Función para mostrar una sección específica
-            function showSection(sectionId) {
-                sections.forEach(section => {
-                    section.classList.remove('active');
-                });
-                document.getElementById(sectionId).classList.add('active');
-            }
-            
-            // Event listeners para navegación
-            goToSignup.addEventListener('click', function(e) {
+            const loginSection = document.getElementById('login-section');
+            const signupSection = document.getElementById('signup-section');
+
+            goToSignup.addEventListener('click', function (e) {
                 e.preventDefault();
-                showSection('signup-section');
+                loginSection.classList.remove('active');
+                signupSection.classList.add('active');
             });
-            
-            goToLogin.addEventListener('click', function(e) {
+
+            goToLogin.addEventListener('click', function (e) {
                 e.preventDefault();
-                showSection('login-section');
+                signupSection.classList.remove('active');
+                loginSection.classList.add('active');
             });
-            
-            loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                // Aquí iría la lógica de autenticación
-                showSection('menu-section');
-            });
-            
-            signupForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                // Aquí iría la lógica de registro
-                showSection('menu-section');
-            });
-            
-            goToTakePhoto.addEventListener('click', function() {
-                showSection('take-photo-section');
-            });
-            
-            goToHelp.addEventListener('click', function() {
-                showSection('help-section');
-            });
-            
-            goToPhotos.addEventListener('click', function() {
-                showSection('photos-section');
-            });
-            
-            goToConfig.addEventListener('click', function() {
-                showSection('config-section');
-            });
-            
-            backToMenuButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    showSection('menu-section');
-                });
-            });
-            
-            // Carrusel de fotos
-            const carouselInner = document.querySelector('.carousel-inner');
-            const carouselItems = document.querySelectorAll('.carousel-item');
-            const prevButton = document.querySelector('.carousel-control.prev');
-            const nextButton = document.querySelector('.carousel-control.next');
-            let currentIndex = 0;
-            
-            function updateCarousel() {
-                carouselInner.style.transform = `translateX(-${currentIndex * 100}%)`;
-            }
-            
-            prevButton.addEventListener('click', function() {
-                currentIndex = (currentIndex > 0) ? currentIndex - 1 : carouselItems.length - 1;
-                updateCarousel();
-            });
-            
-            nextButton.addEventListener('click', function() {
-                currentIndex = (currentIndex < carouselItems.length - 1) ? currentIndex + 1 : 0;
-                updateCarousel();
-            });
-            
-            // Auto avanzar el carrusel cada 5 segundos
-            setInterval(function() {
-                currentIndex = (currentIndex < carouselItems.length - 1) ? currentIndex + 1 : 0;
-                updateCarousel();
-            }, 5000);
         });
     </script>
 </body>
+
 </html>

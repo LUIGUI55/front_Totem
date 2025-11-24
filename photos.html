@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Totem Photo - Galería</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="app-container">
+            <div class="header">
+                <div class="header-content">
+                    <h1>Totem Photo</h1>
+                    <p>Captura tus momentos</p>
+                </div>
+
+                <!-- Dropdown Menu Toggle -->
+                <button class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div class="dropdown-menu">
+                    <a href="take-photo.html" class="dropdown-item"><i class="fas fa-camera"></i> Tomar Foto</a>
+                    <a href="gallery.html" class="dropdown-item"><i class="fas fa-photo-video"></i> Mis Fotos</a>
+                    <a href="qr.html" class="dropdown-item"><i class="fas fa-qrcode"></i> Escanear QR</a>
+                    <a href="#" class="dropdown-item" data-modal-target="help-modal"><i
+                            class="fas fa-question-circle"></i> Ayuda</a>
+                    <a href="#" class="dropdown-item" data-modal-target="config-modal"><i class="fas fa-cog"></i>
+                        Configuración</a>
+                    <a href="index.html" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Salir</a>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="menu-container">
+                    <!-- Carousel Section -->
+                    <div class="carousel-section">
+                        <h2 class="carousel-title">Fotos Recientes</h2>
+                        <div class="carousel">
+                            <div class="carousel-inner">
+                                <div class="carousel-item" style="background-color: #ff6b6b;">Foto 1</div>
+                                <div class="carousel-item" style="background-color: #4ecdc4;">Foto 2</div>
+                                <div class="carousel-item" style="background-color: #45b7d1;">Foto 3</div>
+                                <div class="carousel-item" style="background-color: #f7d794;">Foto 4</div>
+                            </div>
+                        </div>
+                        <div class="carousel-controls">
+                            <button class="carousel-control prev">&#10094;</button>
+                            <button class="carousel-control next">&#10095;</button>
+                        </div>
+                    </div>
+
+                    <!-- Templates Section -->
+                    <div class="templates-section">
+                        <h2 class="templates-title">Templates Disponibles</h2>
+                        <div class="templates-grid">
+                            <div class="template-item">Template 1</div>
+                            <div class="template-item">Template 2</div>
+                            <div class="template-item">Template 3</div>
+                            <div class="template-item">Template 4</div>
+                            <div class="template-item">Template 5</div>
+                            <div class="template-item">Template 6</div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Grid -->
+                    <div class="nav-menu" style="margin-top: 30px;">
+                        <a href="take-photo.html" class="nav-item">
+                            <h3><i class="fas fa-camera"></i> TOMAR FOTO</h3>
+                            <p>Captura tu momento especial</p>
+                        </a>
+                        <a href="gallery.html" class="nav-item">
+                            <h3><i class="fas fa-photo-video"></i> MIS FOTOS</h3>
+                            <p>Ver fotos tomadas</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <h2 class="page-title">AYUDA</h2>
+            <div class="page-text">
+                <p>Bienvenido a la sección de ayuda de Totem Photo.</p>
+                <p>Si tienes problemas para iniciar sesión, toma de fotos o cualquier otra función, no dudes en
+                    contactarnos.</p>
+                <p><strong>Email:</strong> support@totemphoto.com</p>
+                <p><strong>Teléfono:</strong> +1 234 567 890</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Config Modal -->
+    <div id="config-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <h2 class="page-title">CONFIGURACIÓN</h2>
+            <div class="form-container" style="box-shadow: none; padding: 0;">
+                <div class="form-group">
+                    <label for="language">Idioma</label>
+                    <select id="language">
+                        <option value="es">Español</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="quality">Calidad de imagen</label>
+                    <select id="quality">
+                        <option value="high">Alta</option>
+                        <option value="medium">Media</option>
+                        <option value="low">Baja</option>
+                    </select>
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="notifications" checked style="width: auto;">
+                    <label for="notifications" style="margin: 0;">Notificaciones</label>
+                </div>
+                <button class="btn">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+
+</html>
