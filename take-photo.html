@@ -7,6 +7,8 @@
     <title>Totem Photo - Tomar Foto</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body>
@@ -56,6 +58,20 @@
                         <a href="photos.html" class="btn" style="max-width: 200px;">Menú Principal</a>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qr-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <button class="close-modal" onclick="closeQRModal()">&times;</button>
+            <h2 class="page-title" style="margin-bottom: 15px;">¡Foto Capturada!</h2>
+            <p style="margin-bottom: 20px; opacity: 0.9;">Escanea el código QR para descargar en tu móvil</p>
+            <div id="qrcode" style="display: flex; justify-content: center; margin: 20px 0;"></div>
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button class="btn" onclick="closeQRModal()" style="flex: 1;">Cerrar</button>
+                <a href="gallery.html" class="btn" style="flex: 1;">Ver Galería</a>
             </div>
         </div>
     </div>
@@ -112,6 +128,8 @@
         const canvas = document.getElementById('camera-canvas');
         const captureBtn = document.getElementById('capture-btn');
         const messageDiv = document.getElementById('camera-message');
+        let currentPhotoData = null;
+        let currentPhotoId = null;
 
         // Initialize camera
         async function initCamera() {
@@ -129,6 +147,42 @@
             }
         }
 
+        // Generate QR Code with download URL
+        function generateQRCode(photoId) {
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = ''; // Clear previous QR code
+
+            // Create a URL that will trigger download
+            // Using the current page URL with a hash parameter
+            const baseUrl = window.location.origin + window.location.pathname.replace('take-photo.html', 'download.html');
+            const downloadUrl = `${baseUrl}?photo=${photoId}`;
+
+            // Create QR code with the download URL
+            new QRCode(qrContainer, {
+                text: downloadUrl,
+                width: 256,
+                height: 256,
+                colorDark: "#016B61",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        }
+
+        // Show QR Modal
+        function showQRModal() {
+            const modal = document.getElementById('qr-modal');
+            modal.classList.add('show');
+            if (currentPhotoId) {
+                generateQRCode(currentPhotoId);
+            }
+        }
+
+        // Close QR Modal
+        function closeQRModal() {
+            const modal = document.getElementById('qr-modal');
+            modal.classList.remove('show');
+        }
+
         // Capture photo
         captureBtn.addEventListener('click', function () {
             canvas.width = video.videoWidth;
@@ -137,25 +191,34 @@
             ctx.drawImage(video, 0, 0);
 
             // Convert to data URL
-            const photoData = canvas.toDataURL('image/jpeg');
+            const photoData = canvas.toDataURL('image/jpeg', 0.8);
+            const photoId = Date.now();
+
+            currentPhotoData = photoData;
+            currentPhotoId = photoId;
 
             // Save to localStorage
             let photos = JSON.parse(localStorage.getItem('totemPhotos') || '[]');
             photos.push({
-                id: Date.now(),
+                id: photoId,
                 data: photoData,
                 timestamp: new Date().toISOString()
             });
             localStorage.setItem('totemPhotos', JSON.stringify(photos));
 
-            messageDiv.textContent = '¡Foto capturada! Ve a la galería para verla.';
-            messageDiv.style.color = '#e879f9';
+            messageDiv.textContent = '¡Foto capturada! Escanea el código QR para descargar.';
+            messageDiv.style.color = '#70B2B2';
 
             // Flash effect
             canvas.style.display = 'block';
             setTimeout(() => {
                 canvas.style.display = 'none';
             }, 100);
+
+            // Show QR modal after a short delay
+            setTimeout(() => {
+                showQRModal();
+            }, 300);
         });
 
         // Initialize on load

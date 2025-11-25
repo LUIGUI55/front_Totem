@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Totem Photo - Descargar Foto</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="app-container">
+            <div class="header">
+                <div class="header-content">
+                    <h1>Totem Photo</h1>
+                    <p>Descarga tu foto</p>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="page-content" style="text-align: center; padding: 40px 20px;">
+                    <div id="download-status">
+                        <i class="fas fa-spinner fa-spin"
+                            style="font-size: 3rem; color: #70B2B2; margin-bottom: 20px;"></i>
+                        <h2 class="page-title">Preparando tu foto...</h2>
+                        <p style="opacity: 0.8;">La descarga comenzará automáticamente</p>
+                    </div>
+
+                    <div id="download-error" style="display: none;">
+                        <i class="fas fa-exclamation-circle"
+                            style="font-size: 3rem; color: #ff6b6b; margin-bottom: 20px;"></i>
+                        <h2 class="page-title">Foto no encontrada</h2>
+                        <p style="opacity: 0.8; margin-bottom: 20px;">La foto que buscas no está disponible o ha
+                            expirado.</p>
+                        <a href="index.html" class="btn" style="max-width: 200px; margin: 0 auto;">Volver al inicio</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get photo ID from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const photoId = urlParams.get('photo');
+
+        if (photoId) {
+            // Try to get photo from localStorage
+            const photos = JSON.parse(localStorage.getItem('totemPhotos') || '[]');
+            const photo = photos.find(p => p.id == photoId);
+
+            if (photo) {
+                // Photo found, trigger download
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.href = photo.data;
+                    link.download = `totem-photo-${photoId}.jpg`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    // Show success message
+                    document.getElementById('download-status').innerHTML = `
+                        <i class="fas fa-check-circle" style="font-size: 3rem; color: #70B2B2; margin-bottom: 20px;"></i>
+                        <h2 class="page-title">¡Descarga completada!</h2>
+                        <p style="opacity: 0.8; margin-bottom: 20px;">Tu foto ha sido descargada exitosamente</p>
+                        <a href="index.html" class="btn" style="max-width: 200px; margin: 0 auto;">Volver al inicio</a>
+                    `;
+                }, 1000);
+            } else {
+                // Photo not found
+                document.getElementById('download-status').style.display = 'none';
+                document.getElementById('download-error').style.display = 'block';
+            }
+        } else {
+            // No photo ID provided
+            document.getElementById('download-status').style.display = 'none';
+            document.getElementById('download-error').style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>

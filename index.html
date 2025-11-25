@@ -8,25 +8,43 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Card flip container */
+        .auth-card-container {
+            perspective: 1000px;
+            min-height: 500px;
+            transition: min-height 0.5s ease;
+        }
+
+        .auth-card-container.expanded {
+            min-height: 650px;
+        }
+
+        .auth-card {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        .auth-card.flipped {
+            transform: rotateY(180deg);
+        }
+
         .section {
-            display: none;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
-        .section.active {
-            display: block;
-            animation: fadeIn 0.5s ease;
+        #login-section {
+            transform: rotateY(0deg);
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        #signup-section {
+            transform: rotateY(180deg);
         }
     </style>
 </head>
@@ -42,55 +60,59 @@
             </div>
 
             <div class="content">
-                <!-- Página de Login -->
-                <div id="login-section" class="section active">
-                    <div class="form-container">
-                        <h2 class="form-title">Login</h2>
-                        <form id="login-form" action="photos.html">
-                            <div class="form-group">
-                                <label for="username">Username</label>
-                                <input type="text" id="username" name="username" required>
+                <div class="auth-card-container">
+                    <div class="auth-card" id="auth-card">
+                        <!-- Página de Login -->
+                        <div id="login-section" class="section">
+                            <div class="form-container">
+                                <h2 class="form-title">Login</h2>
+                                <form id="login-form" action="photos.html">
+                                    <div class="form-group">
+                                        <label for="username">Username</label>
+                                        <input type="text" id="username" name="username" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="password">Password</label>
+                                        <input type="password" id="password" name="password" required>
+                                    </div>
+                                    <button type="submit" class="btn">Login</button>
+                                    <div class="link">
+                                        <a href="#" id="forgot-password">Forget password?</a>
+                                    </div>
+                                </form>
+                                <div class="link">
+                                    <p>Don't have an account? <a href="#" id="go-to-signup">Signup</a></p>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="password">Password</label>
-                                <input type="password" id="password" name="password" required>
-                            </div>
-                            <button type="submit" class="btn">Login</button>
-                            <div class="link">
-                                <a href="#" id="forgot-password">Forget password?</a>
-                            </div>
-                        </form>
-                        <div class="link">
-                            <p>Don't have an account? <a href="#" id="go-to-signup">Signup</a></p>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Página de Registro -->
-                <div id="signup-section" class="section">
-                    <div class="form-container">
-                        <h2 class="form-title">Signup</h2>
-                        <form id="signup-form" action="photos.html">
-                            <div class="form-group">
-                                <label for="signup-username">Username</label>
-                                <input type="text" id="signup-username" name="username" required>
+                        <!-- Página de Registro -->
+                        <div id="signup-section" class="section">
+                            <div class="form-container">
+                                <h2 class="form-title">Signup</h2>
+                                <form id="signup-form" action="photos.html">
+                                    <div class="form-group">
+                                        <label for="signup-username">Username</label>
+                                        <input type="text" id="signup-username" name="username" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email-phone">Email / Phone</label>
+                                        <input type="text" id="email-phone" name="email-phone" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="signup-password">Password</label>
+                                        <input type="password" id="signup-password" name="password" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="confirm-password">Confirm Password</label>
+                                        <input type="password" id="confirm-password" name="confirm-password" required>
+                                    </div>
+                                    <button type="submit" class="btn">Signup</button>
+                                </form>
+                                <div class="link">
+                                    <p>Already registered? <a href="#" id="go-to-login">Login</a></p>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="email-phone">Email / Phone</label>
-                                <input type="text" id="email-phone" name="email-phone" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="signup-password">Password</label>
-                                <input type="password" id="signup-password" name="password" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="confirm-password">Confirm Password</label>
-                                <input type="password" id="confirm-password" name="confirm-password" required>
-                            </div>
-                            <button type="submit" class="btn">Signup</button>
-                        </form>
-                        <div class="link">
-                            <p>Already registered? <a href="#" id="go-to-login">Login</a></p>
                         </div>
                     </div>
                 </div>
@@ -102,19 +124,19 @@
         document.addEventListener('DOMContentLoaded', function () {
             const goToSignup = document.getElementById('go-to-signup');
             const goToLogin = document.getElementById('go-to-login');
-            const loginSection = document.getElementById('login-section');
-            const signupSection = document.getElementById('signup-section');
+            const authCard = document.getElementById('auth-card');
+            const authCardContainer = document.querySelector('.auth-card-container');
 
             goToSignup.addEventListener('click', function (e) {
                 e.preventDefault();
-                loginSection.classList.remove('active');
-                signupSection.classList.add('active');
+                authCard.classList.add('flipped');
+                authCardContainer.classList.add('expanded');
             });
 
             goToLogin.addEventListener('click', function (e) {
                 e.preventDefault();
-                signupSection.classList.remove('active');
-                loginSection.classList.add('active');
+                authCard.classList.remove('flipped');
+                authCardContainer.classList.remove('expanded');
             });
         });
     </script>
