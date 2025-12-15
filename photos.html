@@ -6,8 +6,340 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Totem Photo - Galería</title>
     <link rel="stylesheet" href="css/styles.css">
-    <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .carousel-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 60px;
+        }
+
+        .carousel-container {
+            overflow: hidden;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .carousel-slide {
+            min-width: calc(33.333% - 14px);
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .carousel-slide img:hover {
+            transform: scale(1.05);
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(232, 121, 249, 0.9);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #1a0a2e;
+            box-shadow: 0 4px 12px rgba(232, 121, 249, 0.4);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .carousel-btn:hover {
+            background: #f0abfc;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 16px rgba(232, 121, 249, 0.6);
+        }
+
+        .carousel-btn.prev {
+            left: 10px;
+        }
+
+        .carousel-btn.next {
+            right: 10px;
+        }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .carousel-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .carousel-dot.active {
+            background: #e879f9;
+            width: 24px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(232, 121, 249, 0.5);
+        }
+
+        .carousel-loading {
+            text-align: center;
+            padding: 40px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .carousel-error {
+            text-align: center;
+            padding: 40px;
+            color: #ff6b6b;
+        }
+
+        .templates-section {
+            margin-top: 50px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(232, 121, 249, 0.2);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .templates-header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .templates-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #e879f9, transparent);
+            border-radius: 2px;
+        }
+
+        .templates-title {
+            font-size: 1.8rem;
+            color: #e879f9;
+            margin: 0;
+            font-weight: 600;
+            text-shadow: 0 2px 8px rgba(232, 121, 249, 0.3);
+        }
+
+        .templates-subtitle {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 8px;
+        }
+
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            justify-items: center;
+        }
+
+        .template-item {
+            position: relative;
+            width: 100%;
+            max-width: 350px;
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(232, 121, 249, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .template-item:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(232, 121, 249, 0.5);
+            box-shadow: 0 12px 24px rgba(232, 121, 249, 0.3);
+        }
+
+        .template-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(232, 121, 249, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .template-item:hover::before {
+            opacity: 1;
+        }
+
+        .template-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .template-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .templates-empty {
+            text-align: center;
+            padding: 60px 30px;
+            color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 2px dashed rgba(232, 121, 249, 0.2);
+        }
+        
+
+        .templates-empty i {
+            font-size: 4.5rem;
+            margin-bottom: 20px;
+            opacity: 0.4;
+            color: #e879f9;
+        }
+
+        .templates-empty p {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .templates-empty .btn {
+            max-width: 350px;
+            margin: 0 auto;
+            display: block;
+            text-align: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #e879f9, #f0abfc);
+            box-shadow: 0 4px 12px rgba(232, 121, 249, 0.3);
+        }
+
+        .templates-empty .btn:hover {
+            box-shadow: 0 6px 16px rgba(232, 121, 249, 0.5);
+        }
+
+        .action-buttons {
+            text-align: center;
+            margin-top: 40px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons .btn {
+            max-width: 220px;
+            display: inline-block;
+            margin: 0;
+            background: linear-gradient(135deg, #e879f9, #f0abfc);
+            box-shadow: 0 4px 12px rgba(232, 121, 249, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-buttons .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .action-buttons .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .action-buttons .btn:hover {
+            box-shadow: 0 6px 20px rgba(232, 121, 249, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .carousel-slide {
+                min-width: calc(100% - 20px);
+            }
+
+            .carousel-wrapper {
+                padding: 20px 50px;
+            }
+
+            .templates-section {
+                padding: 20px;
+                margin-top: 30px;
+            }
+
+            .templates-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                padding: 15px;
+            }
+
+            .template-item {
+                max-width: 100%;
+            }
+
+            .templates-title {
+                font-size: 1.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .action-buttons .btn {
+                max-width: 100%;
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -19,12 +351,10 @@
                     <p>Captura tus momentos</p>
                 </div>
 
-                <!-- Dropdown Menu Toggle -->
                 <button class="menu-toggle">
                     <i class="fas fa-bars"></i>
                 </button>
 
-                <!-- Dropdown Menu -->
                 <div class="dropdown-menu">
                     <a href="take-photo.html" class="dropdown-item"><i class="fas fa-camera"></i> Tomar Foto</a>
                     <a href="gallery.html" class="dropdown-item"><i class="fas fa-photo-video"></i> Mis Fotos</a>
@@ -33,59 +363,86 @@
                             class="fas fa-question-circle"></i> Ayuda</a>
                     <a href="#" class="dropdown-item" data-modal-target="config-modal"><i class="fas fa-cog"></i>
                         Configuración</a>
-                    <a href="index.html" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Salir</a>
+                    <a href="#" id="logout-link" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Salir</a>
                 </div>
             </div>
 
             <div class="content">
-                <div class="menu-container">
-                    <!-- Carousel Section -->
-                    <div class="carousel-section">
-                        <h2 class="carousel-title">Fotos Recientes</h2>
-                        <div class="carousel">
-                            <div class="carousel-inner">
-                                <div class="carousel-item" style="background-color: #ff6b6b;">Foto 1</div>
-                                <div class="carousel-item" style="background-color: #4ecdc4;">Foto 2</div>
-                                <div class="carousel-item" style="background-color: #45b7d1;">Foto 3</div>
-                                <div class="carousel-item" style="background-color: #f7d794;">Foto 4</div>
-                            </div>
-                        </div>
-                        <div class="carousel-controls">
-                            <button class="carousel-control prev">&#10094;</button>
-                            <button class="carousel-control next">&#10095;</button>
-                        </div>
+                <h2 class="page-title">Mis Fotos</h2>
+
+                <div class="carousel-section">
+                    <h3 style="text-align: center; margin-bottom: 15px; color: #e879f9; font-size: 1.5rem;">Imágenes Integradas</h3>
+
+                    <div id="carousel-loading" class="carousel-loading">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 32px;"></i>
+                        <p>Cargando imágenes...</p>
                     </div>
 
-                    <!-- Templates Section -->
-                    <div class="templates-section">
-                        <h2 class="templates-title">Templates Disponibles</h2>
-                        <div class="templates-grid">
-                            <div class="template-item">Template 1</div>
-                            <div class="template-item">Template 2</div>
-                            <div class="template-item">Template 3</div>
-                            <div class="template-item">Template 4</div>
-                            <div class="template-item">Template 5</div>
-                            <div class="template-item">Template 6</div>
-                        </div>
+                    <div id="carousel-error" class="carousel-error" style="display: none;">
+                        <i class="fas fa-exclamation-circle" style="font-size: 32px;"></i>
+                        <p>Error al cargar las imágenes</p>
                     </div>
 
-                    <!-- Navigation Grid -->
-                    <div class="nav-menu" style="margin-top: 30px;">
-                        <a href="take-photo.html" class="nav-item">
-                            <h3><i class="fas fa-camera"></i> TOMAR FOTO</h3>
-                            <p>Captura tu momento especial</p>
-                        </a>
-                        <a href="gallery.html" class="nav-item">
-                            <h3><i class="fas fa-photo-video"></i> MIS FOTOS</h3>
-                            <p>Ver fotos tomadas</p>
+                    <div id="carousel-wrapper" class="carousel-wrapper" style="display: none;">
+                        <button class="carousel-btn prev" id="prevBtn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        
+                        <div class="carousel-container">
+                            <div class="carousel-track" id="carouselTrack"></div>
+                        </div>
+
+                        <button class="carousel-btn next" id="nextBtn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+
+                        <div class="carousel-dots" id="carouselDots"></div>
+                    </div>
+
+                    <div id="integrated-empty" class="empty-message" style="display: none;">
+                        No hay imágenes integradas aún.
+                    </div>
+                </div>
+
+                <div class="templates-section">
+                    <div class="templates-header">
+                        <h3 class="templates-title">Plantillas Disponibles</h3>
+                        <p class="templates-subtitle">Explora y gestiona tus plantillas</p>
+                    </div>
+                        
+                    <div id="templates-grid" class="templates-grid"></div>
+
+                    <div id="templates-empty" class="templates-empty" style="display: none;">
+                        <i class="fas fa-layer-group"></i>
+                        <p>No tienes plantillas cargadas.</p>
+                        <a href="take-template.html" class="btn">
+                            <i class="fas fa-plus-circle"></i> 
+                            <br>
+                            Subir Plantilla
                         </a>
                     </div>
+                </div>
+
+                <div class="action-buttons">
+                    <a href="take-template.html" class="btn">
+                        <i class="fas fa-plus-circle"></i> Nueva Plantilla
+                    </a>
+                    <a href="take-photo.html" class="btn">
+                        <i class="fas fa-camera"></i> Tomar Nueva Foto
+                    </a>
+                    <a href="photos.html" class="btn">
+                        <i class="fas fa-home"></i> Menú Principal
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Help Modal -->
+    <div id="photo-viewer" class="photo-viewer">
+        <button class="photo-viewer-close">&times;</button>
+        <img id="viewer-image" src="/placeholder.svg" alt="Photo">
+    </div>
+
     <div id="help-modal" class="modal">
         <div class="modal-content">
             <button class="close-modal">&times;</button>
@@ -100,7 +457,6 @@
         </div>
     </div>
 
-    <!-- Config Modal -->
     <div id="config-modal" class="modal">
         <div class="modal-content">
             <button class="close-modal">&times;</button>
@@ -130,7 +486,322 @@
         </div>
     </div>
 
-    <script src="js/script.js"></script>
+    <script>
+        const API_BASE_URL = 'https://totem.itsfdavid.com';
+        
+        let carouselImages = [];
+        let currentIndex = 0;
+        let autoPlayInterval = null;
+
+        function checkAuthentication() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = 'index.html';
+                return null;
+            }
+            return token;
+        }
+
+        async function getSecureImageUrl(url) {
+            const token = localStorage.getItem('accessToken');
+            if (!token) return null;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const imageBlob = await response.blob();
+                    return URL.createObjectURL(imageBlob);
+                }
+                return null;
+            } catch (error) {
+                console.error("Error de red o CORS al cargar la imagen. Cayendo a URL directa:", error);
+                return url; 
+            }
+        }
+
+        async function fetchData(endpoint) {
+            const token = checkAuthentication();
+            if (!token) return null;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    return await response.json();
+                } else if (response.status === 401) {
+                    localStorage.removeItem('accessToken');
+                    window.location.href = 'index.html';
+                    return null;
+                } else {
+                    console.error(`Error al obtener ${endpoint}:`, response.status, response.statusText);
+                    return [];
+                }
+            } catch (error) {
+                console.error('Error de red al obtener datos:', error);
+                return [];
+            }
+        }
+
+        async function loadCarouselImages() {
+            const loadingEl = document.getElementById('carousel-loading');
+            const errorEl = document.getElementById('carousel-error');
+            const wrapperEl = document.getElementById('carousel-wrapper');
+            const emptyEl = document.getElementById('integrated-empty');
+
+            try {
+                const token = localStorage.getItem('accessToken');
+                const response = await fetch('https://totem.itsfdavid.com/templates/my-with-images', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al cargar imágenes');
+                }
+
+                const data = await response.json();
+                carouselImages = data;
+
+                loadingEl.style.display = 'none';
+
+                if (carouselImages.length === 0) {
+                    emptyEl.style.display = 'block';
+                    return;
+                }
+
+                wrapperEl.style.display = 'block';
+                renderCarousel();
+                startAutoPlay();
+            } catch (error) {
+                console.error('Error:', error);
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'block';
+            }
+        }
+
+        function renderCarousel() {
+            const track = document.getElementById('carouselTrack');
+            const dotsContainer = document.getElementById('carouselDots');
+            
+            track.innerHTML = '';
+            dotsContainer.innerHTML = '';
+
+            carouselImages.forEach((image, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'carousel-slide';
+                
+                const img = document.createElement('img');
+                img.src = image.url;
+                img.alt = `Imagen ${index + 1}`;
+                img.onclick = () => viewImage(image.url);
+                
+                slide.appendChild(img);
+                track.appendChild(slide);
+
+                const dot = document.createElement('div');
+                dot.className = `carousel-dot ${index === 0 ? 'active' : ''}`;
+                dot.onclick = () => goToSlide(index);
+                dotsContainer.appendChild(dot);
+            });
+
+            updateCarousel();
+        }
+
+        function updateCarousel() {
+            const track = document.getElementById('carouselTrack');
+            const dots = document.querySelectorAll('.carousel-dot');
+            const isMobile = window.innerWidth <= 768;
+            
+            const slideWidth = isMobile ? 100 : 33.333;
+            track.style.transform = `translateX(-${currentIndex * slideWidth}%)`;
+
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentIndex);
+            });
+        }
+
+        function goToSlide(index) {
+            currentIndex = index;
+            updateCarousel();
+            resetAutoPlay();
+        }
+
+        function nextSlide() {
+            currentIndex = (currentIndex + 1) % carouselImages.length;
+            updateCarousel();
+        }
+
+        function prevSlide() {
+            currentIndex = (currentIndex - 1 + carouselImages.length) % carouselImages.length;
+            updateCarousel();
+        }
+
+        function startAutoPlay() {
+            autoPlayInterval = setInterval(nextSlide, 4000);
+        }
+
+        function resetAutoPlay() {
+            clearInterval(autoPlayInterval);
+            startAutoPlay();
+        }
+
+        function viewImage(url) {
+            const viewer = document.getElementById('photo-viewer');
+            const img = document.getElementById('viewer-image');
+            img.src = url;
+            viewer.classList.add('show');
+        }
+
+        async function renderTemplates(templates) {
+            const templatesGrid = document.getElementById("templates-grid");
+            const templatesEmpty = document.getElementById("templates-empty");
+
+            templatesGrid.innerHTML = "";
+
+            if (templates.length === 0) {
+                templatesEmpty.style.display = "block";
+                templatesGrid.style.display = "none";
+                return;
+            }
+
+            templatesEmpty.style.display = "none";
+            templatesGrid.style.display = "grid";
+
+            const secureUrls = await Promise.all(
+                templates.map((template) => getSecureImageUrl(template.url))
+            );
+
+            templates.forEach((template, index) => {
+                const secureUrl = secureUrls[index];
+                if (!secureUrl) return;
+
+                const item = document.createElement("div");
+                item.className = "gallery-item template-item";
+                
+                const imgElement = document.createElement('img');
+                imgElement.src = secureUrl;
+                imgElement.alt = `Template ${index + 1}`;
+                
+                imgElement.addEventListener('click', () => {
+                    viewTemplate(template.uuid, secureUrl);
+                });
+
+                item.appendChild(imgElement);
+                templatesGrid.appendChild(item);
+            });
+        }
+
+        async function loadUserPhotosAndTemplates() {
+            await loadCarouselImages();
+
+            const templatesData = await fetchData("/templates/my");
+            if (templatesData) {
+                renderTemplates(templatesData);
+            }
+        }
+
+        function viewTemplate(uuid, url) {
+            const viewer = document.getElementById("photo-viewer");
+            const img = document.getElementById("viewer-image");
+            img.src = url;
+            viewer.classList.add("show");
+        }
+        
+        function logOut(e) {
+            e.preventDefault();
+            localStorage.removeItem("accessToken");
+            window.location.href = "index.html";
+        }
+
+        document.querySelector(".photo-viewer-close").addEventListener("click", function () {
+            document.getElementById("photo-viewer").classList.remove("show");
+        });
+
+        document.getElementById("photo-viewer").addEventListener("click", function (e) {
+            if (e.target === this) {
+                this.classList.remove("show");
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            loadUserPhotosAndTemplates();
+            
+            const logoutLink = document.getElementById("logout-link");
+            if (logoutLink) {
+                logoutLink.addEventListener("click", logOut);
+            }
+
+            document.getElementById('prevBtn').addEventListener('click', () => {
+                prevSlide();
+                resetAutoPlay();
+            });
+
+            document.getElementById('nextBtn').addEventListener('click', () => {
+                nextSlide();
+                resetAutoPlay();
+            });
+
+            const wrapper = document.getElementById('carousel-wrapper');
+            wrapper.addEventListener('mouseenter', () => {
+                clearInterval(autoPlayInterval);
+            });
+
+            wrapper.addEventListener('mouseleave', () => {
+                startAutoPlay();
+            });
+
+            window.addEventListener('resize', updateCarousel);
+            
+            const menuToggle = document.querySelector('.menu-toggle');
+            const dropdownMenu = document.querySelector('.dropdown-menu');
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    dropdownMenu.classList.toggle('show');
+                });
+            }
+            
+            document.addEventListener('click', (e) => {
+                if (!menuToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                    dropdownMenu.classList.remove('show');
+                }
+            });
+            
+            document.querySelectorAll('[data-modal-target]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const modalId = btn.getAttribute('data-modal-target');
+                    const modal = document.getElementById(modalId);
+                    if (modal) modal.classList.add('show');
+                });
+            });
+            
+            document.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    btn.closest('.modal').classList.remove('show');
+                });
+            });
+            
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.remove('show');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

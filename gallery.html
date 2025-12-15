@@ -114,15 +114,63 @@
         </div>
     </div>
 
-    <script src="js/script.js"></script>
+    <!-- <script src="js/script.js"></script> -->
     <script>
-        // Load photos from localStorage
-        function loadGallery() {
+        const API_BASE_URL = 'https://totem.itsfdavid.com';
+        const API_ENDPOINT = '/templates/my-with-images'; // Ruta para imágenes integradas
+
+        // 1. FUNCIÓN DE UTILIDAD: Autenticación
+        function checkAuthentication() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = 'index.html'; 
+                return null;
+            }
+            return token;
+        }
+
+        // 2. FUNCIÓN DE UTILIDAD: Llamada Genérica a la API (solo para obtener el JSON de URLs)
+        async function fetchData(endpoint) {
+            const token = checkAuthentication();
+            if (!token) return null;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    return await response.json();
+                } else if (response.status === 401) {
+                    localStorage.removeItem('accessToken');
+                    window.location.href = 'index.html';
+                    return null;
+                } else {
+                    console.error(`Error al obtener ${endpoint}:`, response.status, response.statusText);
+                    return []; 
+                }
+            } catch (error) {
+                console.error('Error de red al obtener datos:', error);
+                return [];
+            }
+        }
+
+
+        // 3. FUNCIÓN PRINCIPAL: Cargar Imágenes Integradas de la API (Método Directo)
+        async function loadIntegratedImages() {
             const galleryGrid = document.getElementById('gallery-grid');
             const emptyGallery = document.getElementById('empty-gallery');
-            const photos = JSON.parse(localStorage.getItem('totemPhotos') || '[]');
+            
+            // Obtener datos de la API (solo la lista de URLs)
+            const images = await fetchData(API_ENDPOINT);
 
-            if (photos.length === 0) {
+            galleryGrid.innerHTML = '';
+            
+            if (!images || images.length === 0) {
                 emptyGallery.style.display = 'block';
                 galleryGrid.style.display = 'none';
                 return;
@@ -130,56 +178,71 @@
 
             emptyGallery.style.display = 'none';
             galleryGrid.style.display = 'grid';
-            galleryGrid.innerHTML = '';
-
-            photos.reverse().forEach((photo, index) => {
+            
+            // Renderizar las imágenes usando la URL directa
+            images.forEach((img, index) => {
+                const imageUrl = img.url; 
+                const uuid = img.uuid; 
+                
                 const item = document.createElement('div');
                 item.className = 'gallery-item';
-                item.innerHTML = `
-                    <img src="${photo.data}" alt="Photo ${index + 1}">
-                    <div class="gallery-item-actions">
-                        <button onclick="viewPhoto(${photo.id})" title="Ver"><i class="fas fa-eye"></i></button>
-                        <button onclick="downloadPhoto(${photo.id})" title="Descargar"><i class="fas fa-download"></i></button>
-                        <button onclick="deletePhoto(${photo.id})" title="Eliminar"><i class="fas fa-trash"></i></button>
-                    </div>
+                
+                // --- CREACIÓN DEL ELEMENTO IMG ---
+                const imgElement = document.createElement('img');
+                imgElement.src = imageUrl;
+                imgElement.alt = `Photo ${index + 1}`;
+                
+                // ASIGNAR EL EVENTO CLICK DIRECTO A LA IMAGEN
+                imgElement.addEventListener('click', () => {
+                    viewPhoto(uuid, imageUrl);
+                });
+                
+                // Contenedor de acciones
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'gallery-item-actions';
+                
+                actionsDiv.innerHTML = `
+                    <button onclick="downloadPhoto('${uuid}', '${imageUrl}')" title="Descargar"><i class="fas fa-download"></i></button>
                 `;
+                
+                // Montar el item:
+                item.appendChild(imgElement);
+                item.appendChild(actionsDiv);
+
                 galleryGrid.appendChild(item);
             });
         }
 
+        // 4. Funciones de Acciones (usando la URL directa de la API)
+
         // View photo in fullscreen
-        function viewPhoto(id) {
-            const photos = JSON.parse(localStorage.getItem('totemPhotos') || '[]');
-            const photo = photos.find(p => p.id === id);
-            if (photo) {
-                const viewer = document.getElementById('photo-viewer');
-                const img = document.getElementById('viewer-image');
-                img.src = photo.data;
-                viewer.classList.add('show');
-            }
+        function viewPhoto(uuid, url) {
+            const viewer = document.getElementById('photo-viewer');
+            const img = document.getElementById('viewer-image');
+            img.src = url;
+            viewer.classList.add('show');
         }
 
         // Download photo
-        function downloadPhoto(id) {
-            const photos = JSON.parse(localStorage.getItem('totemPhotos') || '[]');
-            const photo = photos.find(p => p.id === id);
-            if (photo) {
-                const link = document.createElement('a');
-                link.href = photo.data;
-                link.download = `totem-photo-${id}.jpg`;
-                link.click();
+        function downloadPhoto(uuid, url) {
+            // NOTA: Para descargar una imagen de una URL externa, 
+            // generalmente necesitas una ruta proxy en el backend o que la cabecera CORS 
+            // permita la descarga. Aquí usamos un truco de enlace directo.
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `totem-photo-${uuid}.png`;
+            link.target = "_blank"; // Abrir en nueva pestaña si falla la descarga directa
+            link.click();
+        }
+
+        // Delete photo 
+        function deletePhoto(uuid) {
+            if (confirm(`¿Estás seguro de que quieres eliminar la imagen ${uuid}?`)) {
+                console.warn(`Lógica de eliminación para ${uuid} no implementada en el frontend.`);
+                // Debes implementar el endpoint DELETE en tu API
             }
         }
 
-        // Delete photo
-        function deletePhoto(id) {
-            if (confirm('¿Estás seguro de que quieres eliminar esta foto?')) {
-                let photos = JSON.parse(localStorage.getItem('totemPhotos') || '[]');
-                photos = photos.filter(p => p.id !== id);
-                localStorage.setItem('totemPhotos', JSON.stringify(photos));
-                loadGallery();
-            }
-        }
 
         // Close photo viewer
         document.querySelector('.photo-viewer-close').addEventListener('click', function () {
@@ -193,7 +256,9 @@
         });
 
         // Load gallery on page load
-        loadGallery();
+        document.addEventListener('DOMContentLoaded', function() {
+            loadIntegratedImages();
+        });
     </script>
 </body>
 

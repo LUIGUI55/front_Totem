@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Totem Photo - Subir Plantilla (Cámara)</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="app-container">
+            <div class="header">
+                <div class="header-content">
+                    <h1>Totem Photo</h1>
+                    <p>Captura tu plantilla</p>
+                </div>
+
+                <button class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div class="dropdown-menu">
+                    <a href="photos.html" class="dropdown-item"><i class="fas fa-images"></i> Galería Principal</a>
+                    <a href="take-photo.html" class="dropdown-item"><i class="fas fa-camera"></i> Tomar Foto</a>
+                    <a href="gallery.html" class="dropdown-item"><i class="fas fa-photo-video"></i> Mis Fotos</a>
+                    <a href="#" class="dropdown-item" data-modal-target="help-modal"><i
+                            class="fas fa-question-circle"></i> Ayuda</a>
+                    <a href="#" class="dropdown-item" data-modal-target="config-modal"><i class="fas fa-cog"></i>
+                        Configuración</a>
+                    <a href="index.html" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Salir</a>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="camera-container" style="max-width: 600px; margin: 0 auto;"> 
+                    <h2 class="page-title">Capturar Plantilla</h2>
+
+                    <div class="camera-preview">
+                        <video id="camera-video" autoplay playsinline></video>
+                        <canvas id="camera-canvas"></canvas>
+                        
+                        <div id="countdown-overlay" class="countdown-overlay" style="display: none;">
+                            <span id="countdown-number">3</span>
+                        </div>
+                        <div id="loading-overlay" class="loading-overlay" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Subiendo y procesando plantilla...</p>
+                        </div>
+                    </div>
+
+                    <div class="camera-controls">
+                        <button class="capture-btn" id="capture-btn" title="Capturar foto"></button>
+                    </div>
+
+                    <div id="camera-message" style="text-align: center; margin-bottom: 20px; color: #e879f9;">
+                        Cámara lista. Presiona el botón para tomar la plantilla.
+                    </div>
+
+                    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                        <a href="photos.html" class="btn" style="max-width: 200px;">Menú Principal</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <h2 class="page-title">AYUDA</h2>
+            <div class="page-text">
+                <p>...</p>
+            </div>
+        </div>
+    </div>
+    <div id="config-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <h2 class="page-title">CONFIGURACIÓN</h2>
+            <div class="form-container" style="box-shadow: none; padding: 0;">
+                <div class="form-group"><label for="language">...</label></div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const API_BASE_URL = 'https://totem.itsfdavid.com';
+        const UPLOAD_ENDPOINT = '/templates/upload'; // Endpoint para subir plantilla
+
+        const video = document.getElementById('camera-video');
+        const canvas = document.getElementById('camera-canvas');
+        const captureBtn = document.getElementById('capture-btn');
+        const messageDiv = document.getElementById('camera-message');
+        const countdownOverlay = document.getElementById('countdown-overlay');
+        const countdownNumber = document.getElementById('countdown-number');
+        const loadingOverlay = document.getElementById('loading-overlay');
+
+        // --- AUTENTICACIÓN ---
+        function checkAuthentication() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = 'index.html'; 
+                return null;
+            }
+            return token;
+        }
+
+        // --- FUNCIÓN DE TEMPORIZADOR (Copiado de take-photo) ---
+        function startCountdown(duration) {
+            return new Promise((resolve) => {
+                let timer = duration;
+                countdownNumber.textContent = timer;
+                countdownOverlay.style.display = 'flex';
+                captureBtn.disabled = true;
+
+                const interval = setInterval(() => {
+                    timer--;
+                    countdownNumber.textContent = timer;
+                    if (timer <= 0) {
+                        clearInterval(interval);
+                        countdownOverlay.style.display = 'none';
+                        resolve();
+                    }
+                }, 1000);
+            });
+        }
+
+        // --- FUNCIÓN PRINCIPAL DE CAPTURA Y SUBIDA ---
+        async function captureAndUpload() {
+            const token = checkAuthentication();
+            if (!token) return;
+
+            // 1. Iniciar Temporizador (3 segundos)
+            await startCountdown(3); 
+
+            // 2. Capturar Foto (Misma lógica de rotación/espejo que take-photo)
+            const videoWidth = video.videoWidth;
+            const videoHeight = video.videoHeight;
+            
+            if (videoHeight > videoWidth) {
+                canvas.width = videoHeight; 
+                canvas.height = videoWidth;
+            } else {
+                canvas.width = videoWidth;
+                canvas.height = videoHeight;
+            }
+
+            const ctx = canvas.getContext('2d');
+            
+            // Corrección de rotación y espejo
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(90 * Math.PI / 180); 
+            ctx.scale(-1, 1); 
+            ctx.drawImage(video, -videoHeight / 2, -videoWidth / 2, videoHeight, videoWidth);
+            ctx.setTransform(1, 0, 0, 1, 0, 0); 
+
+            const photoDataURL = canvas.toDataURL('image/png', 1.0); // Usar PNG sin compresión para plantilla
+            
+            // Flash effect
+            canvas.style.display = 'block';
+            setTimeout(() => {
+                canvas.style.display = 'none';
+                ctx.clearRect(0, 0, canvas.width, canvas.height); 
+            }, 100);
+            
+            // 3. Preparar Subida
+            loadingOverlay.style.display = 'flex';
+            captureBtn.disabled = true;
+            messageDiv.textContent = 'Foto capturada. Subiendo plantilla...';
+            
+            // Convertir Data URL a Blob/File
+            const blob = await (await fetch(photoDataURL)).blob();
+            const templateFile = new File([blob], "template.png", { type: "image/png" });
+
+            const formData = new FormData();
+            formData.append('file', templateFile);
+
+            // 4. Subir a la API
+            try {
+                const response = await fetch(`${API_BASE_URL}${UPLOAD_ENDPOINT}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.textContent = `Plantilla subida exitosamente (UUID: ${data.uuid}). Redirigiendo a galería...`;
+                    messageDiv.style.color = '#79e879'; 
+                    
+                    // Redirige al menú principal después de 3 segundos
+                    setTimeout(() => {
+                        window.location.href = 'photos.html';
+                    }, 3000);
+
+                } else {
+                    messageDiv.textContent = `Error al subir: ${data.detail || data.message || 'Fallo desconocido.'}`;
+                    messageDiv.style.color = '#ff6b6b';
+                }
+
+            } catch (error) {
+                console.error('Error al subir:', error);
+                messageDiv.textContent = 'Error de conexión o subida. Intenta de nuevo.';
+                messageDiv.style.color = '#ff6b6b';
+            } finally {
+                loadingOverlay.style.display = 'none';
+                captureBtn.disabled = false;
+            }
+        }
+
+
+        // Initialize camera
+        async function initCamera() {
+            const token = checkAuthentication();
+            if (!token) return; 
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user' },
+                    audio: false
+                });
+                video.srcObject = stream;
+                messageDiv.textContent = 'Cámara lista. Presiona el botón para tomar la plantilla.';
+                captureBtn.disabled = false;
+
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                messageDiv.textContent = 'Error: No se pudo acceder a la cámara. Por favor, permite el acceso.';
+                messageDiv.style.color = '#ff6b6b';
+                captureBtn.disabled = true;
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            captureBtn.addEventListener('click', captureAndUpload);
+            initCamera();
+        });
+    </script>
+</body>
+
+</html>

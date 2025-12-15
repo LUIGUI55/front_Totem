@@ -18,12 +18,10 @@
                     <p>Captura tu momento</p>
                 </div>
 
-                <!-- Dropdown Menu Toggle -->
                 <button class="menu-toggle">
                     <i class="fas fa-bars"></i>
                 </button>
 
-                <!-- Dropdown Menu -->
                 <div class="dropdown-menu">
                     <a href="photos.html" class="dropdown-item"><i class="fas fa-images"></i> Galería Principal</a>
                     <a href="gallery.html" class="dropdown-item"><i class="fas fa-photo-video"></i> Mis Fotos</a>
@@ -37,30 +35,45 @@
             </div>
 
             <div class="content">
-                <div class="camera-container">
-                    <h2 class="page-title">Tomar Foto</h2>
-
-                    <div class="camera-preview">
-                        <video id="camera-video" autoplay playsinline></video>
-                        <canvas id="camera-canvas"></canvas>
+                <div class="camera-layout">
+                    <div id="templates-sidebar" class="templates-sidebar">
+                        <h3 class="sidebar-title">Seleccionar Template</h3>
+                        <div id="templates-grid-sidebar" class="templates-grid-sidebar">
+                            </div>
+                        <div id="template-message" style="color: #e879f9; text-align: center; margin-top: 10px;">Cargando...</div>
                     </div>
 
-                    <div class="camera-controls">
-                        <button class="capture-btn" id="capture-btn" title="Capturar foto"></button>
-                    </div>
+                    <div class="camera-container">
+                        <h2 class="page-title">Tomar Foto</h2>
 
-                    <div id="camera-message" style="text-align: center; margin-bottom: 20px; color: #e879f9;"></div>
+                        <div class="camera-preview">
+                            <video id="camera-video" autoplay playsinline></video>
+                            <canvas id="camera-canvas"></canvas>
+                            <div id="countdown-overlay" class="countdown-overlay" style="display: none;">
+                                <span id="countdown-number">3</span>
+                            </div>
+                            <div id="loading-overlay" class="loading-overlay" style="display: none;">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Procesando imagen...</p>
+                            </div>
+                        </div>
 
-                    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                        <a href="gallery.html" class="btn" style="max-width: 200px;">Ver Galería</a>
-                        <a href="photos.html" class="btn" style="max-width: 200px;">Menú Principal</a>
+                        <div class="camera-controls">
+                            <button class="capture-btn" id="capture-btn" title="Capturar foto"></button>
+                        </div>
+
+                        <div id="camera-message" style="text-align: center; margin-bottom: 20px; color: #e879f9;"></div>
+
+                        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                            <a href="gallery.html" class="btn" style="max-width: 200px;">Ver Galería</a>
+                            <a href="photos.html" class="btn" style="max-width: 200px;">Menú Principal</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Help Modal -->
     <div id="help-modal" class="modal">
         <div class="modal-content">
             <button class="close-modal">&times;</button>
@@ -75,7 +88,6 @@
         </div>
     </div>
 
-    <!-- Config Modal -->
     <div id="config-modal" class="modal">
         <div class="modal-content">
             <button class="close-modal">&times;</button>
@@ -105,61 +117,242 @@
         </div>
     </div>
 
-    <script src="js/script.js"></script>
+    <!-- <script src="js/script.js"></script> -->
     <script>
-        // Camera functionality
+        const API_BASE_URL = 'https://totem.itsfdavid.com';
+        const API_TEMPLATES_ENDPOINT = '/templates/my'; 
+
         const video = document.getElementById('camera-video');
         const canvas = document.getElementById('camera-canvas');
         const captureBtn = document.getElementById('capture-btn');
         const messageDiv = document.getElementById('camera-message');
+        const countdownOverlay = document.getElementById('countdown-overlay');
+        const countdownNumber = document.getElementById('countdown-number');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const templatesGrid = document.getElementById('templates-grid-sidebar');
+        const templateMessage = document.getElementById('template-message');
+
+        let selectedTemplateId = null;
+
+        // --- AUTENTICACIÓN Y FETCH BÁSICO ---
+        function checkAuthentication() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = 'index.html'; 
+                return null;
+            }
+            return token;
+        }
+
+        async function fetchData(endpoint) {
+            const token = checkAuthentication();
+            if (!token) return null;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    return await response.json();
+                } else if (response.status === 401) {
+                    localStorage.removeItem('accessToken');
+                    window.location.href = 'index.html';
+                    return null;
+                }
+                return [];
+            } catch (error) {
+                console.error('Error de red al obtener datos:', error);
+                return [];
+            }
+        }
+        
+        // Función para cargar templates 
+        async function loadTemplates() {
+            const templates = await fetchData(API_TEMPLATES_ENDPOINT);
+            templatesGrid.innerHTML = '';
+
+            if (templates.length === 0) {
+                templateMessage.textContent = 'No hay plantillas disponibles.';
+                captureBtn.disabled = true;
+                return;
+            }
+
+            templateMessage.textContent = 'Selecciona una plantilla.';
+            
+            templates.forEach((template, index) => {
+                const item = document.createElement('div');
+                item.className = 'template-selection-item';
+                item.dataset.uuid = template.uuid;
+                item.innerHTML = `<img src="${template.url}" alt="Template ${index + 1}">`;
+                
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.template-selection-item').forEach(i => i.classList.remove('selected'));
+                    item.classList.add('selected');
+                    selectedTemplateId = template.uuid;
+                    captureBtn.disabled = false;
+                    messageDiv.textContent = 'Plantilla seleccionada. ¡Lista para capturar!';
+                });
+                
+                templatesGrid.appendChild(item);
+                
+                // Seleccionar la primera por defecto
+                if (index === 0) {
+                    item.click();
+                }
+            });
+        }
+        
+        // --- FUNCIÓN DE TEMPORIZADOR ---
+        function startCountdown(duration) {
+            return new Promise((resolve) => {
+                let timer = duration;
+                countdownNumber.textContent = timer;
+                countdownOverlay.style.display = 'flex';
+                captureBtn.disabled = true;
+
+                const interval = setInterval(() => {
+                    timer--;
+                    countdownNumber.textContent = timer;
+                    if (timer <= 0) {
+                        clearInterval(interval);
+                        countdownOverlay.style.display = 'none';
+                        resolve();
+                    }
+                }, 1000);
+            });
+        }
+        
+        // --- FUNCIÓN DE CAPTURA Y INTEGRACIÓN ---
+        async function captureAndIntegrate() {
+            if (!selectedTemplateId) {
+                messageDiv.textContent = 'Por favor, selecciona una plantilla antes de capturar.';
+                messageDiv.style.color = '#ff6b6b';
+                return;
+            }
+
+            // 1. Iniciar Temporizador
+            await startCountdown(3); 
+
+            // 2. Capturar Foto
+            const videoWidth = video.videoWidth;
+            const videoHeight = video.videoHeight;
+            
+            if (videoHeight > videoWidth) {
+                canvas.width = videoHeight; 
+                canvas.height = videoWidth;
+            } else {
+                canvas.width = videoWidth;
+                canvas.height = videoHeight;
+            }
+
+            const ctx = canvas.getContext('2d');
+            
+            // Corrección de rotación y espejo
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(90 * Math.PI / 180); 
+            ctx.scale(-1, 1); 
+            ctx.drawImage(video, -videoHeight / 2, -videoWidth / 2, videoHeight, videoWidth);
+            ctx.setTransform(1, 0, 0, 1, 0, 0); 
+
+            const photoDataURL = canvas.toDataURL('image/jpeg', 0.9);
+            
+            // Flash effect
+            canvas.style.display = 'block';
+            setTimeout(() => {
+                canvas.style.display = 'none';
+                ctx.clearRect(0, 0, canvas.width, canvas.height); 
+            }, 100);
+            
+            // 3. Preparar Subida
+            loadingOverlay.style.display = 'flex';
+            captureBtn.disabled = true;
+            messageDiv.textContent = 'Foto capturada. Enviando para integración...';
+            
+            // Convertir Data URL a Blob/File
+            const blob = await (await fetch(photoDataURL)).blob();
+            const photoFile = new File([blob], "photo.jpg", { type: "image/jpeg" });
+
+            // 4. Integrar con la API
+            const token = checkAuthentication();
+            if (!token) return;
+
+            const formData = new FormData();
+            formData.append('file', photoFile);
+
+            try {
+                const endpoint = `/templates/integrate/${selectedTemplateId}`;
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // 5. Generar URL de Imagen y Redirigir a QR
+                    const imageUuid = data.uuid;
+                    // Decodificar token para obtener user_id
+                    const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+                    const userId = tokenPayload.user_id || tokenPayload.sub; // Usa sub si user_id no existe
+                    
+                    const qrUrlBase = `${API_BASE_URL}/templates/image/${userId}/${imageUuid}.png`;
+                    
+                    messageDiv.textContent = '¡Integración exitosa! Generando QR...';
+                    window.location.href = `qr.html?url=${encodeURIComponent(qrUrlBase)}`;
+                    
+                } else {
+                    messageDiv.textContent = `Error en integración: ${data.detail || 'Fallo desconocido'}`;
+                    messageDiv.style.color = '#ff6b6b';
+                }
+
+            } catch (error) {
+                console.error('Error al subir/integrar:', error);
+                messageDiv.textContent = 'Error de conexión o integración. Intenta de nuevo.';
+                messageDiv.style.color = '#ff6b6b';
+            } finally {
+                loadingOverlay.style.display = 'none';
+                captureBtn.disabled = false;
+            }
+        }
+
 
         // Initialize camera
         async function initCamera() {
+            const token = checkAuthentication();
+            if (!token) return; 
+
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: 'user' },
                     audio: false
                 });
                 video.srcObject = stream;
-                messageDiv.textContent = 'Cámara lista. Haz clic en el botón para capturar.';
+                messageDiv.textContent = 'Cámara lista. Selecciona una plantilla.';
+                
+                loadTemplates();
+
             } catch (err) {
                 console.error('Error accessing camera:', err);
                 messageDiv.textContent = 'Error: No se pudo acceder a la cámara. Por favor, permite el acceso.';
                 messageDiv.style.color = '#ff6b6b';
+                captureBtn.disabled = true;
             }
         }
 
-        // Capture photo
-        captureBtn.addEventListener('click', function () {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0);
-
-            // Convert to data URL
-            const photoData = canvas.toDataURL('image/jpeg');
-
-            // Save to localStorage
-            let photos = JSON.parse(localStorage.getItem('totemPhotos') || '[]');
-            photos.push({
-                id: Date.now(),
-                data: photoData,
-                timestamp: new Date().toISOString()
-            });
-            localStorage.setItem('totemPhotos', JSON.stringify(photos));
-
-            messageDiv.textContent = '¡Foto capturada! Ve a la galería para verla.';
-            messageDiv.style.color = '#e879f9';
-
-            // Flash effect
-            canvas.style.display = 'block';
-            setTimeout(() => {
-                canvas.style.display = 'none';
-            }, 100);
-        });
-
         // Initialize on load
-        initCamera();
+        document.addEventListener('DOMContentLoaded', function() {
+            captureBtn.addEventListener('click', captureAndIntegrate);
+            captureBtn.disabled = true;
+            initCamera();
+        });
     </script>
 </body>
 
